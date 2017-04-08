@@ -1,0 +1,50 @@
+\hypertarget{classblmintegrals}{
+\section{blmintegrals Class Reference}
+\label{classblmintegrals}\index{blmintegrals@{blmintegrals}}
+}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classblmintegrals_a6bce8d9042569ae61748953a275309b5}{integral1} (vector$<$ vector$<$ double $>$ $>$ \&a\_\-matrix, vector$<$ double $>$ \&a\_\-x1, vector$<$ double $>$ \&a\_\-x2, vector$<$ double $>$ \&a\_\-x3, vector$<$ vector$<$ double $>$ $>$ \&Etensor)
+\item 
+void \hyperlink{classblmintegrals_aa27da27cf77c5d936633c66d1813ad8d}{integral2} (vector$<$ double $>$ \&a\_\-vector, vector$<$ double $>$ \&a\_\-x1, vector$<$ double $>$ \&a\_\-x2, vector$<$ double $>$ \&a\_\-x3, vector$<$ double $>$ \&a\_\-force)
+\item 
+void \hyperlink{classblmintegrals_a776e27864b68961f17e93d4465df9e75}{integral3xx} (vector$<$ double $>$ \&a\_\-vector, vector$<$ double $>$ \&a\_\-x1, vector$<$ double $>$ \&a\_\-x2, vector$<$ double $>$ \&a\_\-x3, vector$<$ double $>$ \&a\_\-zvector, vector$<$ double $>$ \&a\_\-traction)
+\item 
+void \hyperlink{classblmintegrals_a4ad8f34c8a9cf0f1f05dc385a5ee985a}{integral3yy} (vector$<$ double $>$ \&a\_\-vector, vector$<$ double $>$ \&a\_\-x1, vector$<$ double $>$ \&a\_\-x2, vector$<$ double $>$ \&a\_\-x3, vector$<$ double $>$ \&a\_\-zvector, vector$<$ double $>$ \&a\_\-traction)
+\item 
+void \hyperlink{classblmintegrals_aaa8101a80b5b739666cd601565ec4105}{integral3zz} (vector$<$ double $>$ \&a\_\-vector, vector$<$ double $>$ \&a\_\-x1, vector$<$ double $>$ \&a\_\-x2, vector$<$ double $>$ \&a\_\-x3, vector$<$ double $>$ \&a\_\-zvector, vector$<$ double $>$ \&a\_\-traction)
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classblmintegrals_a6bce8d9042569ae61748953a275309b5}{
+\index{blmintegrals@{blmintegrals}!integral1@{integral1}}
+\index{integral1@{integral1}!blmintegrals@{blmintegrals}}
+\subsubsection[{integral1}]{\setlength{\rightskip}{0pt plus 5cm}void blmintegrals::integral1 (vector$<$ vector$<$ double $>$ $>$ \& {\em a\_\-matrix}, \/  vector$<$ double $>$ \& {\em a\_\-x1}, \/  vector$<$ double $>$ \& {\em a\_\-x2}, \/  vector$<$ double $>$ \& {\em a\_\-x3}, \/  vector$<$ vector$<$ double $>$ $>$ \& {\em Etensor})}}
+\label{classblmintegrals_a6bce8d9042569ae61748953a275309b5}
+Perform Integral 1 for balance of linear momentum. First argument is matrix to return into. Next 3 are input vectors from node table. Last is input matrix of elasticity tensor. \hypertarget{classblmintegrals_aa27da27cf77c5d936633c66d1813ad8d}{
+\index{blmintegrals@{blmintegrals}!integral2@{integral2}}
+\index{integral2@{integral2}!blmintegrals@{blmintegrals}}
+\subsubsection[{integral2}]{\setlength{\rightskip}{0pt plus 5cm}void blmintegrals::integral2 (vector$<$ double $>$ \& {\em a\_\-vector}, \/  vector$<$ double $>$ \& {\em a\_\-x1}, \/  vector$<$ double $>$ \& {\em a\_\-x2}, \/  vector$<$ double $>$ \& {\em a\_\-x3}, \/  vector$<$ double $>$ \& {\em a\_\-force})}}
+\label{classblmintegrals_aa27da27cf77c5d936633c66d1813ad8d}
+Perform Integral 2 for balance of linear momentum. First argument is vector to return into. Next 3 are input vectors from node table. Last is input vector of force components. \hypertarget{classblmintegrals_a776e27864b68961f17e93d4465df9e75}{
+\index{blmintegrals@{blmintegrals}!integral3xx@{integral3xx}}
+\index{integral3xx@{integral3xx}!blmintegrals@{blmintegrals}}
+\subsubsection[{integral3xx}]{\setlength{\rightskip}{0pt plus 5cm}void blmintegrals::integral3xx (vector$<$ double $>$ \& {\em a\_\-vector}, \/  vector$<$ double $>$ \& {\em a\_\-x1}, \/  vector$<$ double $>$ \& {\em a\_\-x2}, \/  vector$<$ double $>$ \& {\em a\_\-x3}, \/  vector$<$ double $>$ \& {\em a\_\-zvector}, \/  vector$<$ double $>$ \& {\em a\_\-traction})}}
+\label{classblmintegrals_a776e27864b68961f17e93d4465df9e75}
+Perform surface Integral 3 for balance of linear momentum on x surface. First argument is vector to return into. Next 3 are input vectors from node table. Last is input vector of traction components. \hypertarget{classblmintegrals_a4ad8f34c8a9cf0f1f05dc385a5ee985a}{
+\index{blmintegrals@{blmintegrals}!integral3yy@{integral3yy}}
+\index{integral3yy@{integral3yy}!blmintegrals@{blmintegrals}}
+\subsubsection[{integral3yy}]{\setlength{\rightskip}{0pt plus 5cm}void blmintegrals::integral3yy (vector$<$ double $>$ \& {\em a\_\-vector}, \/  vector$<$ double $>$ \& {\em a\_\-x1}, \/  vector$<$ double $>$ \& {\em a\_\-x2}, \/  vector$<$ double $>$ \& {\em a\_\-x3}, \/  vector$<$ double $>$ \& {\em a\_\-zvector}, \/  vector$<$ double $>$ \& {\em a\_\-traction})}}
+\label{classblmintegrals_a4ad8f34c8a9cf0f1f05dc385a5ee985a}
+Perform surface Integral 3 for balance of linear momentum on y surface. First argument is vector to return into. Next 3 are input vectors from node table. Last is input vector of traction components. \hypertarget{classblmintegrals_aaa8101a80b5b739666cd601565ec4105}{
+\index{blmintegrals@{blmintegrals}!integral3zz@{integral3zz}}
+\index{integral3zz@{integral3zz}!blmintegrals@{blmintegrals}}
+\subsubsection[{integral3zz}]{\setlength{\rightskip}{0pt plus 5cm}void blmintegrals::integral3zz (vector$<$ double $>$ \& {\em a\_\-vector}, \/  vector$<$ double $>$ \& {\em a\_\-x1}, \/  vector$<$ double $>$ \& {\em a\_\-x2}, \/  vector$<$ double $>$ \& {\em a\_\-x3}, \/  vector$<$ double $>$ \& {\em a\_\-zvector}, \/  vector$<$ double $>$ \& {\em a\_\-traction})}}
+\label{classblmintegrals_aaa8101a80b5b739666cd601565ec4105}
+Perform surface Integral 3 for balance of linear momentum on z surface. First argument is vector to return into. Next 3 are input vectors from node table. Last is input vector of traction components. 
+
+The documentation for this class was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+src/blmintegrals.H\end{DoxyCompactItemize}
