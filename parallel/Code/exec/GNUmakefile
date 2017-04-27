@@ -4,6 +4,7 @@
 HOME = ..
 VPATH = . $(HOME)/include/VisitWriter
 CFLAGS = -I. -I$(HOME) -I$(HOME)/src -I$(HOME)/include/VisitWriter -std=c++11
+OPENMP = -fopenmp
 DIM=3
 system := $(shell uname)
 CXX=g++
@@ -34,7 +35,7 @@ all: project
 	$(CXX) -MM $(CFLAGS) $< > $*.d
 
 project:  blm_main.cpp $(HOME)/include/VisitWriter/VisitWriter.o $(OBJS)
-	  $(CXX) $(CPPFLAGS) $(CFLAGS) -o groupF.exe blm_main.cpp $(OBJS)
+	  $(CXX) $(CPPFLAGS) $(CFLAGS) $(OPENMP) -o parallel.exe blm_main.cpp $(OBJS)
 
 clean:
 	rm -r *.o *.d *.exe *.dSYM $(HOME)/src/*.o $(HOME)/src/*.d $(HOME)/src/*.exe $(HOME)/src/*.dSYM $(HOME)/include/VisitWriter/*.o $(HOME)/include/VisitWriter/*.d $(HOME)/include/VisitWriter/*.exe $(HOME)/include/VisitWriter/*.dSYM
