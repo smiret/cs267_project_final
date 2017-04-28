@@ -1,2 +1,2 @@
 VisitWriter.o: ../include/VisitWriter/VisitWriter.cpp \
-  ../include/VisitWriter/VisitWriter.H
+ ../include/VisitWriter/VisitWriter.H

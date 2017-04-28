@@ -134,60 +134,63 @@ int main(int argc, char** argv)
   SparseMatrix stiffness_matrix(3*n_nodes,3*n_nodes); //full stiffness matrix - Sparse matrix
   vector<double> load_vector(3*n_nodes); //full load vector
   //vector<vector<double>> stiff_elem(24,vector<double>(24)); //Stiffness matrix per element
-  vector<double> load_elem(24); //load vector per element
-  vector<double> x1(8), x2(8), x3(8); //space coordinates
   //fp = fopen("loadelem.txt", "w+");
-    double stiff_elem[24][24];
 
-  #pragma omp parallel for private(stiff_elem)
+  #pragma omp parallel for
   for(int e = 0; e < n_elem; e++)
     {
-        //cout << "Hello from thread " << omp_get_thread_num() << endl;
-      for(int X = 0; X < 8; X++)
-        {
-          x1[X] = node_table[conn_table[e][X]][0];
-          x2[X] = node_table[conn_table[e][X]][1];
-          x3[X] = node_table[conn_table[e][X]][2];
-        }
+          //cout << "Hello from thread " << omp_get_thread_num() << endl;
+        double x1[8], x2[8], x3[8]; //space coordinates
+//#pragma omp critical
+  //    {
+          for (int X = 0; X < 8; X++) {
 
-      //vector<vector<double>> stiff_elem(24,vector<double>(24)); //Stiffness matrix per element
+              //#pragma omp atomic
+              x1[X] = node_table[conn_table[e][X]][0];
 
+              //#pragma omp atomic
+              x2[X] = node_table[conn_table[e][X]][1];
 
-        //Integral 1
-      #pragma omp critical
-      {
+              //#pragma omp atomic
+              x3[X] = node_table[conn_table[e][X]][2];
+          }
+
+          //vector<vector<double>> stiff_elem(24,vector<double>(24)); //Stiffness matrix per element
+        double stiff_elem[24][24];
+          //Integral 1
+          //#pragma omp critical
+          //{
+
           blm_integrate.integral1(stiff_elem, x1, x2, x3, Etensor);
-      }
-      for (int ii = 0; ii < 8; ii++)
-        {
-          for (int jj = 0; jj < 8; jj++)
-            {
-              double stf = stiff_elem[ii][jj];;
-              if(stf > 0.00001 || stf < -0.00001)
-                {
-                  #pragma omp atomic
-                  stiffness_matrix[{{conn_table[e][ii],conn_table[e][jj]}}] += stiff_elem[ii][jj]; //first component
-                }
-                stf = stiff_elem[ii+8][jj+8];;
-              if(stf > 0.00001 || stf < -0.00001)
-                {
-                  #pragma omp atomic
-                  stiffness_matrix[{{conn_table2[e][ii],conn_table2[e][jj]}}] += stiff_elem[ii+8][jj+8]; //second component
-                }
-              stf = stiff_elem[ii+16][jj+16];;
-              if(stf > 0.00001 || stf < -0.00001)
-                {
-                  #pragma omp atomic
-                  stiffness_matrix[{{conn_table3[e][ii],conn_table3[e][jj]}}] += stiff_elem[ii+16][jj+16]; //second component
-                }
-            }
-        }
-
+          //}
+          for (int ii = 0; ii < 8; ii++) {
+              for (int jj = 0; jj < 8; jj++) {
+                  double stf = stiff_elem[ii][jj];;
+                  if (stf > 0.00001 || stf < -0.00001) {
+                      // Dont need these atomics either
+//#pragma omp atomic
+                      stiffness_matrix[{{conn_table[e][ii], conn_table[e][jj]}}] += stiff_elem[ii][jj]; //first component
+                  }
+                  stf = stiff_elem[ii + 8][jj + 8];;
+                  if (stf > 0.00001 || stf < -0.00001) {
+//#pragma omp atomic
+                      stiffness_matrix[{{conn_table2[e][ii], conn_table2[e][jj]}}] += stiff_elem[ii + 8][jj +
+                                                                                                         8]; //second component
+                  }
+                  stf = stiff_elem[ii + 16][jj + 16];;
+                  if (stf > 0.00001 || stf < -0.00001) {
+//#pragma omp atomic
+                      stiffness_matrix[{{conn_table3[e][ii], conn_table3[e][jj]}}] += stiff_elem[ii + 16][jj +
+                                                                                                          16]; //second component
+                  }
+              }
+          }
+      double load_elem[24]; //load vector per element
       //Integral 2
-      #pragma omp critical
-      {
+      //#pragma omp critical
+      //{
           blm_integrate.integral2(load_elem, x1, x2, x3, force);
-      }
+      //}
       /*for(int i=0; i<(3*8); i++)
         {
           fprintf(fp,"%14.10f",load_elem[i]);
@@ -195,11 +198,12 @@ int main(int argc, char** argv)
         }*/
       for (int ii = 0; ii < 8; ii++)
         {
-#pragma omp atomic
+            // Seems we do not need these atomics at all
+//#pragma omp atomic
           load_vector[conn_table[e][ii]] += load_elem[ii]; //first component
-#pragma omp atomic
+//#pragma omp atomic
           load_vector[conn_table2[e][ii]] += load_elem[ii+8]; //second component
-#pragma omp atomic
+//#pragma omp atomic
           load_vector[conn_table3[e][ii]] += load_elem[ii+16]; //third component
         }
         //cout << "Thread " << omp_get_thread_num() << " stiff_elem[0][0] = " << stiff_elem[0][1] << endl;
@@ -340,6 +344,7 @@ int main(int argc, char** argv)
   vector<double> surface_elem(24); //load vector per element for surface boundary condition
   /*fp = fopen("surfaceelem.txt", "w+");
   fp2 = fopen("x.txt", "w+");*/
+    vector<double> x1(8), x2(8), x3(8); //space coordinates
   //#pragma omp for
   for (int e = (n_elem - (N-1)*(N-1)); e < n_elem; e++)
     {

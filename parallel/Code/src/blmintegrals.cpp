@@ -5,13 +5,15 @@
 #include <vector>
 #include "blmintegrals.H"
 #include "femfunctions.H"
+#include <omp.h>
 
 using namespace std;
 
-void blmintegrals :: integral1(vector<vector<double> >& a_matrix,
-		 vector<double>& a_x1,
-		 vector<double>& a_x2,
-		 vector<double>& a_x3,
+//vector<vector<double> >&
+void blmintegrals :: integral1(double (&a_matrix)[24][24],
+                               double (&a_x1)[8],
+                               double (&a_x2)[8],
+                               double (&a_x3)[8],
 		 vector<vector<double> >& Etensor)
 
 {
@@ -32,7 +34,8 @@ void blmintegrals :: integral1(vector<vector<double> >& a_matrix,
   vector<vector<double> > inter2(24,vector <double> (24));
   vector<vector<double> > fS1(24,vector <double>(24));
   femfunctions femfunc;
-  
+
+    //cout << "Hello from " << omp_get_thread_num() << endl;
 
   gauss5 = {0.000000000000000, 0.538469310105683, -0.538469310105683,0.906179845938664, -0.906179845938664};
 
@@ -46,6 +49,7 @@ void blmintegrals :: integral1(vector<vector<double> >& a_matrix,
         }
     }
 
+//#pragma parallel for
   for (int ii = 0; ii < 5; ii++)
     {
       for (int jj = 0; jj < 5; jj++)
@@ -238,21 +242,23 @@ void blmintegrals :: integral1(vector<vector<double> >& a_matrix,
             }
         }
     }
+//#pragma omp parallel for
   for (int qq = 0; qq < 24; qq++)
     {
       for (int ww = 0; ww < 24; ww++)
         {
+          //#pragma omp atomic
           a_matrix[qq][ww] = fS1[qq][ww];
         }
     }
 };
 
 
-void blmintegrals :: integral2(vector<double>& a_vector,
-		 vector<double>& a_x1,
-		 vector<double>& a_x2,
-		 vector<double>& a_x3,
-		 vector<double>& a_force)
+void blmintegrals :: integral2(double (&a_vector)[24],
+           double (&a_x1)[8],
+           double (&a_x2)[8],
+           double (&a_x3)[8],
+           vector<double>& a_force)
 
 {
 //Gauss Points for numerical integration

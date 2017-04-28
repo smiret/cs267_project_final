@@ -1,6 +1,7 @@
 #include "CGSolver.H"
 double CGSolver::solve(const SparseMatrix& a_A, const vector<double>& a_rhs, double a_tolerance, int a_iter, vector<double>& a_phi)
 {
+  // const double a_rhs[], int a_rhs_size,
   cout << "Solver" << endl;
   int length = a_rhs.size();
   vector<double> temp(length);
