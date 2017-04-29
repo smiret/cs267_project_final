@@ -1,4 +1,5 @@
 #include "CGSolver.H"
+
 double CGSolver::solve(const SparseMatrix& a_A, const vector<double>& a_rhs, double a_tolerance, int a_iter, vector<double>& a_phi)
 {
   // const double a_rhs[], int a_rhs_size,
@@ -17,6 +18,8 @@ double CGSolver::solve(const SparseMatrix& a_A, const vector<double>& a_rhs, dou
     }
   vector<double> res(length);
   vector<double> product = a_A * a_phi;
+
+  #pragma omp parallel for
   for(int j = 0; j < length; j++)
     {
       res[j] = a_rhs[j] - product[j];
@@ -85,11 +88,13 @@ double CGSolver::solve(const SparseMatrix& a_A, const vector<double>& a_rhs, dou
           den += p[j] * ap[j];
       }
       double alpha = num/den;
+      #pragma omp parallel for
       for(int j = 0; j < length; j++)
       {
           a_phi[j] += alpha * p[j];
       }
       product = a_A * a_phi;
+      #pragma omp parallel for
       for(int j = 0; j < length; j++)
       {
           res[j] = a_rhs[j] - product[j];
@@ -100,7 +105,8 @@ double CGSolver::solve(const SparseMatrix& a_A, const vector<double>& a_rhs, dou
           num2 -= res[j] * ap[j];
       }
       double beta = num2/den;
-      for(int j = 0; j < length; j++)
+    #pragma omp parallel for
+    for(int j = 0; j < length; j++)
       {
           p[j] = res[j] + (beta * p[j]);
       }

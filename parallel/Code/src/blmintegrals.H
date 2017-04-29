@@ -35,28 +35,28 @@ public:
   /** Perform surface Integral 3 for balance of linear momentum on x surface. First argument is vector to return into.
   Next 3 are input vectors from node table. Last is input vector of traction components.
   **/
-  void integral3xx(vector<double>& a_vector,
-		 vector<double>& a_x1,
-		 vector<double>& a_x2,
-		 vector<double>& a_x3,
+  void integral3xx(double (&a_vector)[24],
+       double (&a_x1)[8],
+       double (&a_x2)[8],
+       double (&a_x3)[8],
 		 vector<double>& a_zvector,
 		 vector<double>& a_traction);
   /** Perform surface Integral 3 for balance of linear momentum on y surface. First argument is vector to return into.
   Next 3 are input vectors from node table. Last is input vector of traction components.
   **/
-  void integral3yy(vector<double>& a_vector,
-		 vector<double>& a_x1,
-		 vector<double>& a_x2,
-		 vector<double>& a_x3,
+  void integral3yy(double (&a_vector)[24],
+       double (&a_x1)[8],
+       double (&a_x2)[8],
+       double (&a_x3)[8],
 		 vector<double>& a_zvector,
 		 vector<double>& a_traction);
   /** Perform surface Integral 3 for balance of linear momentum on z surface. First argument is vector to return into.
   Next 3 are input vectors from node table. Last is input vector of traction components.
   **/
-  void integral3zz(vector<double>& a_vector,
-		 vector<double>& a_x1,
-		 vector<double>& a_x2,
-		 vector<double>& a_x3,
+  void integral3zz(double (&a_vector)[24],
+       double (&a_x1)[8],
+       double (&a_x2)[8],
+       double (&a_x3)[8],
 		 vector<double>& a_zvector,
 		 vector<double>& a_traction);
 

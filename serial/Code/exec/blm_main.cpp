@@ -1,9 +1,4 @@
 #include <iostream>
-#include <cstdio>
-#include <cstring>
-#include <cassert>
-#include <cmath>
-#include <math.h>
 #include <vector>
 #include <fstream>
 #include "blmintegrals.H"
@@ -178,6 +173,7 @@ int main(int argc, char** argv)
           load_vector[conn_table2[e][ii]] += load_elem[ii+8]; //second component
           load_vector[conn_table3[e][ii]] += load_elem[ii+16]; //third component
         }
+      //cout << " stiff_elem[0][0] = " << stiff_elem[0][1] << endl;
     }
   /*fclose(fp);
   fp = NULL;*/
@@ -376,6 +372,7 @@ int main(int argc, char** argv)
     }
   fclose(fp);
   fp = NULL;*/
+  return 0;
   CGSolver solver;
   //JacobiSolver solver;
   int iterations = 10000;
