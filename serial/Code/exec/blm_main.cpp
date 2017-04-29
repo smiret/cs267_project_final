@@ -372,7 +372,7 @@ int main(int argc, char** argv)
     }
   fclose(fp);
   fp = NULL;*/
-  return 0;
+  //return 0;
   CGSolver solver;
   //JacobiSolver solver;
   int iterations = 10000;
