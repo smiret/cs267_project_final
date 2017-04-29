@@ -1,0 +1,8 @@
+Number of nodes in each direction:
+8
+Force vector:
+100. 100. 100.
+Traction vector:
+0. 0. 100000000.
+k1 u1 k2 u2 v2:
+160000.0 53300. 14973000 4991000 0.9
