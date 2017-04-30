@@ -1,9 +1,4 @@
 #include <iostream>
-#include <cstdio>
-#include <cstring>
-#include <cassert>
-#include <cmath>
-#include <math.h>
 #include <vector>
 #include <fstream>
 #include "blmintegrals.H"
@@ -14,8 +9,6 @@
 #include "CGSolver.H"
 #include "SparseMatrix.H"
 #include "JacobiSolver.H"
-#include <omp.h>
-#include <time.h>
 
 using namespace std;
 int main(int argc, char** argv)
@@ -394,6 +387,7 @@ int main(int argc, char** argv)
   fclose(fp);
   fp = NULL;*/
     //return 0;
+    stiffness_matrix.print();
   CGSolver solver;
   //JacobiSolver solver;
   int iterations = 10000;

@@ -1,5 +1,5 @@
 #include "SparseMatrix.H"
-#include <iostream>
+
 using namespace std;
 SparseMatrix::SparseMatrix(){};
 SparseMatrix::SparseMatrix(int a_M, int a_N)
@@ -12,10 +12,32 @@ SparseMatrix::SparseMatrix(int a_M, int a_N)
   m_data = data;
   m_colIndex = colIndex;
 };
+
+/*
+void SparseMatrix::operator*(SparseMatrix M) const
+{
+  const SparseMatrix A = *this;
+
+  #pragma parallel for reduction(+:value)
+  for(int i = 0; i < m_m; i++)
+  {
+    double value = 0.;
+    for(int j = 0; j < m_n; j++)
+    {
+      const double matrixElement = A[{{i,j}}];
+      const double matrixElement = A[{{i,j}}];
+      const double vectorElement = a_v[j];
+      const double temp = matrixElement*vectorElement;
+      value += temp;
+    }
+  }
+};*/
+
 vector<double> SparseMatrix::operator*(const vector<double>& a_v) const
 {
   vector<double> prod(m_m);
   const SparseMatrix A = *this;
+  #pragma parallel for reduction(+:value)
   for(int i = 0; i < m_m; i++)
     {
       double value = 0.;
@@ -40,6 +62,8 @@ double& SparseMatrix::operator[](array<int, 2> a_index)
       cout << "Indices out of bounds" <<endl;
       exit(-1);
     }
+
+  #pragma parallel for
   for(int i = 0; i < l; i++)
     {
       if(m_colIndex[a_index[0]][i] == a_index[1])
@@ -69,6 +93,8 @@ const double& SparseMatrix::operator[](array<int, 2> a_index) const
       cout << "Indices out of bounds" <<endl;
       exit(-1);
     }
+
+  #pragma parallel for
   for(int i = 0; i < l; i++)
     {
       if(m_colIndex[a_index[0]][i] == a_index[1])
@@ -94,12 +120,15 @@ void SparseMatrix::zero()
   m_data = data;
   m_colIndex = colIndex;
 };
+
 SparseMatrix SparseMatrix::transpose() const
 {
   int m = m_n;
   int n = m_m;
   
   SparseMatrix trans(m,n);
+
+  #pragma omp parallel for
   for(int i = 0; i < m_m; i++)
     {
       for(int j = 0; j < m_colIndex[i].size(); j++)
@@ -126,6 +155,7 @@ bool SparseMatrix::symmetric() const
   const SparseMatrix A = *this;
   if(sym)
     {
+      #pragma omp parallel for
       for(int i = 0; i < m_m; i++)
         {
           for(int j = 0; j < m_n; j++)

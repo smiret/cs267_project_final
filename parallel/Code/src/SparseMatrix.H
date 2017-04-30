@@ -29,6 +29,9 @@ public:
   /// Build and return a new SparseMatrix that is the transpose of the input matrix.
   SparseMatrix transpose() const;
 
+  /// In place sparse matrix matrix multiply
+  //void operator*(SparseMatrix M) const;
+
   /// Get first dimension size.
   unsigned int M() const;
   /// Get second dimension size.
@@ -36,8 +39,10 @@ public:
 
   /// Return true if symmetric.
   bool symmetric() const;
+
   /// Print function for SparseMatrix type.
   void print() const;
+
 private:
   unsigned int m_m, m_n;
   double m_zero;
