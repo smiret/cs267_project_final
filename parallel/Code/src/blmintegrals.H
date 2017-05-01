@@ -23,7 +23,7 @@ public:
 		 double (&a_x1)[8],
          double (&a_x2)[8],
          double (&a_x3)[8],
-		 vector<vector<double> >& Etensor);
+		 const vector<vector<double> > Etensor);
   /** Perform Integral 2 for balance of linear momentum. First argument is vector to return into.
   Next 3 are input vectors from node table. Last is input vector of force components.
   **/

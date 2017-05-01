@@ -11,7 +11,7 @@ void blmintegrals :: integral1(double (&a_matrix)[24][24],
                                double (&a_x1)[8],
                                double (&a_x2)[8],
                                double (&a_x3)[8],
-		 vector<vector<double> >& Etensor)
+		 const vector<vector<double> > Etensor)
 
 {
   //Gauss Points for numerical integration

@@ -113,11 +113,11 @@ double CGSolver::solve(const SparseMatrix& a_A, const vector<double>& a_rhs, dou
             }   
         }  
       iters = i+1;
-      cout << "Iteration " << iters << endl;
-      cout << "Residual " << maxres/normrhs << endl;
+      //cout << "Iteration " << iters << endl;
+      //cout << "Residual " << maxres/normrhs << endl;
     }
   
-  cout << "norm(residual)/norm(rhs) = " << maxres/normrhs << endl;
+  //cout << "norm(residual)/norm(rhs) = " << maxres/normrhs << endl;
   cout << "Number of Iterations = " << iters << endl;
   return maxres;
 };

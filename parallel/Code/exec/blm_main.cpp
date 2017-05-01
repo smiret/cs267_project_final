@@ -9,17 +9,40 @@
 #include "CGSolver.H"
 #include "SparseMatrix.H"
 #include "JacobiSolver.H"
+#include <omp.h>
 
 using namespace std;
-int main(int argc, char** argv)
+int main(int argc, char* argv[])
 {
   //Step 1: Generate the mesh
+    /*
   if(argc != 2)
     {
       cout << "this program takes one argument that is the input file\n";
       return 1;
     }
-  string inFile(argv[1]);
+     */
+    char* fileName = NULL;
+    int numThreads;
+
+  for (int i=1; i < argc; i++)
+  {
+      if (string(argv[i]) == "-i") {
+          fileName = argv[i + 1];
+      }
+      else if (string(argv[i]) == "-n") {
+          numThreads = atoi(argv[i+1]);
+          omp_set_num_threads(numThreads);
+      }
+    }
+
+  if (!fileName)
+    {
+        cout << "Provide an input file!" << endl;
+        return 1;
+    }
+
+  string inFile(fileName);
   string lines[8];
   string words[20];
   ifstream myfile(inFile.c_str());
@@ -35,6 +58,11 @@ int main(int argc, char** argv)
   myfile >> words[10] >> words[11] >> words[12] >> words[13] >> words[14];
   double k1, k2, u1, u2, v2;
   myfile >> k1 >> u1 >> k2 >> u2 >> v2;
+
+  // Create clock
+  double start;
+  double startTotal = omp_get_wtime();
+
   //int N = 10; //Number of nodes in each direction
   int n_nodes = N*N*N; //Number of nodes
   int n_elem = (N-1)*(N-1)*(N-1); //number of elements
@@ -51,7 +79,7 @@ int main(int argc, char** argv)
   vector<vector<int>> conn_table3(n_elem,vector<int>(8));
 
 
-  //#pragma omp parallel for
+  //#pragma omp parallel for //Not worth it?
   for (int qq = 0; qq < n_elem; qq++)
     {
       for (int ww = 0; ww < 8; ww++)
@@ -60,26 +88,7 @@ int main(int argc, char** argv)
           conn_table3[qq][ww] = conn_table2[qq][ww] + n_nodes;
         }
     }
-  /*fp = fopen("conn.txt", "w+");
-  for(int i=0; i<n_elem; i++)
-    {
-      for(int j=0; j<8;j++)
-        {
-          fprintf(fp,"%d ",conn_table2[i][j]);
-        }
-      fprintf(fp,"\n");
-    }
-  fprintf(fp,"\n\n");
-  for(int i=0; i<n_elem; i++)
-    {
-      for(int j=0; j<8;j++)
-        {
-          fprintf(fp,"%d ",conn_table3[i][j]);
-        }
-      fprintf(fp,"\n");
-    }
-  fclose(fp);
-  fp = NULL;   */
+
   //Step 2 - Define the inputs and initialize the required arrays
   vector<double> traction_elem(24); //traction vector per element
 
@@ -122,28 +131,25 @@ int main(int argc, char** argv)
   Etensor[5][5] = ustar;
   
   //Step 3 - Start the compution by looping over the elements
+    start = omp_get_wtime();
+    ////cout << "Starting matrix construction " << endl;
   blmintegrals blm_integrate;
   SparseMatrix stiffness_matrix(3*n_nodes,3*n_nodes); //full stiffness matrix - Sparse matrix
   vector<double> load_vector(3*n_nodes); //full load vector
 
-    time_t timer_start;
-    time_t  timer_end;
+  double x1[8], x2[8], x3[8]; //space coordinates
+  double stiff_elem[24][24];
 
-    time(&timer_start);
-
-    //cout << "Starting matrix construction " << endl;
-  #pragma omp parallel for
+  #pragma omp parallel for private(x1, x2, x3, stiff_elem)
   for(int e = 0; e < n_elem; e++)
     {
-      //cout << "Hello from thread " << omp_get_thread_num() << endl;
-    double x1[8], x2[8], x3[8]; //space coordinates
+      ////cout << "Hello from thread " << omp_get_thread_num() << endl;
+
       for (int X = 0; X < 8; X++) {
           x1[X] = node_table[conn_table[e][X]][0];
           x2[X] = node_table[conn_table[e][X]][1];
           x3[X] = node_table[conn_table[e][X]][2];
       }
-
-    double stiff_elem[24][24];
     blm_integrate.integral1(stiff_elem, x1, x2, x3, Etensor);
       for (int ii = 0; ii < 8; ii++) {
           for (int jj = 0; jj < 8; jj++) {
@@ -164,29 +170,25 @@ int main(int argc, char** argv)
           }
       double load_elem[24]; //load vector per element
           blm_integrate.integral2(load_elem, x1, x2, x3, force);
-      /*for(int i=0; i<(3*8); i++)
-        {
-          fprintf(fp,"%14.10f",load_elem[i]);
-          fprintf(fp,"\n");
-        }*/
+
       for (int ii = 0; ii < 8; ii++)
         {
           load_vector[conn_table[e][ii]] += load_elem[ii]; //first component
           load_vector[conn_table2[e][ii]] += load_elem[ii+8]; //second component
           load_vector[conn_table3[e][ii]] += load_elem[ii+16]; //third component
         }
-        //cout << "Thread " << omp_get_thread_num() << " stiff_elem[0][0] = " << stiff_elem[0][1] << endl;
+        ////cout << "Thread " << omp_get_thread_num() << " stiff_elem[0][0] = " << stiff_elem[0][1] << endl;
     }
+    //return 0;
 
-    time(&timer_end);
-    //cout << "Finished matrix construction time = " << difftime(timer_end, timer_start) << endl;
-  /*fclose(fp);
-  fp = NULL;*/
+    //cout << "Matrix construction, " << (omp_get_wtime() - start) << endl;
+
   //Integral 3 - for boundary conditions
+
+    ////cout << "Setting first boundary conditions construction " << endl;
+    start = omp_get_wtime();
   int p = stiffness_matrix.N();
   const SparseMatrix constStiff = stiffness_matrix;
-    //cout << "Setting first boundary conditions construction " << endl;
-    //time(&timer_start);
 
   #pragma omp parallel for
   for(int e = 0; e < ((N-1)*(N-1)); e++)
@@ -302,8 +304,9 @@ int main(int argc, char** argv)
       }
     }
 
-    //time(&timer_end);
-    //cout << "Finished first boundary conditions construction time = " <<difftime(timer_end, timer_start) << endl;
+    //cout << "Dirichlet BC, " << (omp_get_wtime() - start) << endl;
+    start = omp_get_wtime();
+
   //Traction boundary condition
   //traction = {0.0,0.0,10.0};
   for(int i=0;i<3;i++)
@@ -312,10 +315,6 @@ int main(int argc, char** argv)
     }
   vector<double> zvector(3); //direction for the surface boundary condition
   zvector = {0.0,0.0,1.0};
-  /*fp = fopen("surfaceelem.txt", "w+");
-  fp2 = fopen("x.txt", "w+");*/
-    //cout << "Second first boundary conditions construction " << endl;
-    //time(&timer_start);
 
   #pragma omp for
   for (int e = (n_elem - (N-1)*(N-1)); e < n_elem; e++)
@@ -328,27 +327,9 @@ int main(int argc, char** argv)
           x3[X] = node_table[conn_table[e][X]][2];
         }
         double surface_elem[24]; //load vector per element for surface boundary condition
-      /*for(int i=0; i<(8); i++)
-        {
-          fprintf(fp2,"%14.10f  ",x1[i]);
-        }
-      fprintf(fp2,"\n");
-      for(int i=0; i<(8); i++)
-        {
-          fprintf(fp2,"%14.10f  ",x2[i]);
-        }
-      fprintf(fp2,"\n");
-      for(int i=0; i<(8); i++)
-        {
-          fprintf(fp2,"%14.10f  ",x3[i]);
-        }
-      fprintf(fp2,"\n");*/
+
       blm_integrate.integral3zz(surface_elem, x1, x2, x3, zvector, traction);
-      /*for(int i=0; i<(3*8); i++)
-        {
-          fprintf(fp,"%14.10f",surface_elem[i]);
-          fprintf(fp,"\n");
-        }*/
+
       for (int ii = 0; ii < 8; ii++)
         {
           load_vector[conn_table[e][ii]] += surface_elem[ii]; //first component
@@ -356,42 +337,21 @@ int main(int argc, char** argv)
           load_vector[conn_table3[e][ii]] += surface_elem[ii+16]; //third component  
         }
     }
-    time(&timer_end);
-    //cout << "Setting second boundary conditions construction time = " << difftime(timer_end, timer_start) << endl;
-  /*fclose(fp);
-  fp = NULL;
-  fclose(fp2);
-  fp2 = NULL;*/
+    //cout << "Neumann BC, " << (omp_get_wtime() - start) << endl;
+    //cout << "Total Construction, " << (omp_get_wtime() - startTotal) << endl;
 
+  start = omp_get_wtime();
   //Step 4 - Solve the system of equations
   vector<double> solution_vector(3*n_nodes);
   vector<vector<double>> ufull(n_nodes,vector<double>(3));
-  
-  /*fp = fopen("load.txt", "w+");
-  for(int i=0; i<(3*n_nodes); i++)
-    {
-      fprintf(fp,"%14.10f",load_vector[i]);
-      fprintf(fp,"\n");
-    }
-  fclose(fp);
-  fp = NULL;
-  fp = fopen("stiffness.txt", "w+");
-  for(int i=0; i<(3*n_nodes); i++)
-    {
-      for(int j=0; j<(3*n_nodes);j++)
-        {
-          //fprintf(fp,"%14.10f ",stiffness_matrix[{{i,j}}]);
-        }
-      fprintf(fp,"\n");
-    }
-  fclose(fp);
-  fp = NULL;*/
-    //return 0;
-    stiffness_matrix.print();
+
   CGSolver solver;
   //JacobiSolver solver;
   int iterations = 10000;
   float residual = solver.solve(stiffness_matrix,load_vector,1E-6,iterations,solution_vector);
+
+  //cout << "CG Solver, " << (omp_get_wtime() - start) << endl;
+
   vector<vector<double>> u_full(n_nodes,vector<double>(3));
   //Step 4.5 - Separate the components of the solution
   for(int ii = 0; ii < n_nodes; ii++)
@@ -403,4 +363,5 @@ int main(int argc, char** argv)
 
   //Step 5 - create the graphical output files
   GridWrite(node_table,conn_table,u_full,"projectSolution.vtu");
+    //cout << "Total Runtime, " << (omp_get_wtime() - startTotal) << endl;
 };
