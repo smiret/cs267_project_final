@@ -19,14 +19,14 @@ public:
   ///Constructor
   femfunctions();
   ///Dense Matrix Multiplication
-  void mat_mult(vector<vector<double> >& A_matrix,
-		vector<vector<double> >& B_matrix,
-		vector<vector<double> >& C_matrix);
+  void mat_mult(const vector<vector<double> > A_matrix,
+                const vector<vector<double> > B_matrix,
+                vector<vector<double> >& C_matrix);
 
   ///Dense Matrix Multiplication with Vector
-  void mat_mult_vec(vector<vector<double> >& A_matrix,
-			    vector<double>& B_vector,
-			    vector<double>& C_vector);
+  void mat_mult_vec(const vector<vector<double> > A_matrix,
+                    const vector<double> B_vector,
+                    vector<double>& C_vector);
                 
  ///Dense Matrix Multiplication with Vector
   void vec_mult_mat(vector<double>& A_vector,

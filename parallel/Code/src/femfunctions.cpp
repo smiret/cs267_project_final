@@ -8,8 +8,8 @@ using namespace std;
 femfunctions::femfunctions(){};
 //Dense Matrix Multiplication
 
-void femfunctions::mat_mult(vector<vector<double> >& A_matrix,
-    vector<vector<double> >& B_matrix,
+void femfunctions::mat_mult(const vector<vector<double> > A_matrix,
+    const vector<vector<double> > B_matrix,
     vector<vector<double> >& C_matrix)
 {
 int row_a = A_matrix.size();
@@ -37,8 +37,8 @@ for (int ii = 0; ii < row_a; ii++)
 
 
 //Dense Matrix Multiplication to Yield Vector
-void femfunctions::mat_mult_vec(vector<vector<double> >& A_matrix,
-			    vector<double>& B_vector,
+void femfunctions::mat_mult_vec(const vector<vector<double> > A_matrix,
+			    const vector<double> B_vector,
 			    vector<double>& C_vector)
 
 {

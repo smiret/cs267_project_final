@@ -1,9 +1,4 @@
 #include <iostream>
-#include <cstdio>
-#include <cstring>
-#include <cassert>
-#include <cmath>
-#include <math.h>
 #include <vector>
 #include <fstream>
 #include "blmintegrals.H"
@@ -45,6 +40,11 @@ int main(int argc, char** argv)
   int n_elem = (N-1)*(N-1)*(N-1); //number of elements
   //FILE *fp = NULL;
   //FILE *fp2 = NULL;
+
+  // Create clock
+  clock_t start;
+  clock_t startTotal = clock();
+
   vector<vector<double>> node_table; //Node table initialized
   vector<vector<int>> conn_table; //Connectivity table initialized
   Mesher mesh(N);
@@ -122,10 +122,11 @@ int main(int argc, char** argv)
   Etensor[3][3] = ustar;
   Etensor[4][4] = ustar;
   Etensor[5][5] = ustar;
-  
+
   //Step 3 - Start the compution by looping over the elements
+  start = clock();
   blmintegrals blm_integrate;
-  
+
   SparseMatrix stiffness_matrix(3*n_nodes,3*n_nodes); //full stiffness matrix - Sparse matrix
   vector<double> load_vector(3*n_nodes); //full load vector
   vector<vector<double>> stiff_elem(24,vector<double>(24)); //Stiffness matrix per element
@@ -140,7 +141,7 @@ int main(int argc, char** argv)
           x2[X] = node_table[conn_table[e][X]][1];
           x3[X] = node_table[conn_table[e][X]][2];
         }
-        
+
       //Integral 1
       blm_integrate.integral1(stiff_elem, x1, x2, x3, Etensor);
       for (int ii = 0; ii < 8; ii++)
@@ -178,10 +179,15 @@ int main(int argc, char** argv)
           load_vector[conn_table2[e][ii]] += load_elem[ii+8]; //second component
           load_vector[conn_table3[e][ii]] += load_elem[ii+16]; //third component
         }
+      //cout << " stiff_elem[0][0] = " << stiff_elem[0][1] << endl;
     }
+
+  cout << "Matrix construction, " << (clock() - start)/ (double)CLOCKS_PER_SEC << endl;
   /*fclose(fp);
   fp = NULL;*/
   //Integral 3 - for boundary conditions
+
+  start = clock();
   int p = stiffness_matrix.N();
   const SparseMatrix constStiff = stiffness_matrix;
   for(int e = 0; e < ((N-1)*(N-1)); e++)
@@ -300,7 +306,8 @@ int main(int argc, char** argv)
       stiffness_matrix[{{conn_table3[e][2],conn_table3[e][2]}}] = 1.0;
       stiffness_matrix[{{conn_table3[e][3],conn_table3[e][3]}}] = 1.0;
     }
-
+  cout << "Dirichlet BC, " << (clock() - start)/ (double)CLOCKS_PER_SEC << endl;
+  start = clock();
   //Traction boundary condition
   //traction = {0.0,0.0,10.0};
   for(int i=0;i<3;i++)
@@ -345,7 +352,7 @@ int main(int argc, char** argv)
         {
           load_vector[conn_table[e][ii]] += surface_elem[ii]; //first component
           load_vector[conn_table2[e][ii]] += surface_elem[ii+8]; //second component
-          load_vector[conn_table3[e][ii]] += surface_elem[ii+16]; //third component  
+          load_vector[conn_table3[e][ii]] += surface_elem[ii+16]; //third component
         }
     }
   /*fclose(fp);
@@ -353,10 +360,14 @@ int main(int argc, char** argv)
   fclose(fp2);
   fp2 = NULL;*/
 
+  cout << "Neumann BC, " << (clock() - start)/ (double)CLOCKS_PER_SEC << endl;
+  cout << "Total Construction, " << (clock() - startTotal)/ (double)CLOCKS_PER_SEC << endl;
+
+  start = clock();
   //Step 4 - Solve the system of equations
   vector<double> solution_vector(3*n_nodes);
   vector<vector<double>> ufull(n_nodes,vector<double>(3));
-  
+
   /*fp = fopen("load.txt", "w+");
   for(int i=0; i<(3*n_nodes); i++)
     {
@@ -376,10 +387,13 @@ int main(int argc, char** argv)
     }
   fclose(fp);
   fp = NULL;*/
+
   CGSolver solver;
   //JacobiSolver solver;
   int iterations = 10000;
   float residual = solver.solve(stiffness_matrix,load_vector,1E-6,iterations,solution_vector);
+  cout << "CG Solver, " << (clock() - start)/ (double)CLOCKS_PER_SEC << endl;
+
   vector<vector<double>> u_full(n_nodes,vector<double>(3));
   //Step 4.5 - Separate the components of the solution
   for(int ii = 0; ii < n_nodes; ii++)
@@ -391,4 +405,6 @@ int main(int argc, char** argv)
 
   //Step 5 - create the graphical output files
   GridWrite(node_table,conn_table,u_full,"projectSolution.vtu");
+  cout << "Total Runtime, " << (clock() - startTotal)/ (double)CLOCKS_PER_SEC << endl;
+
 };

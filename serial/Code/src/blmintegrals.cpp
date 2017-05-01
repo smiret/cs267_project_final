@@ -1,10 +1,8 @@
 #include <iostream>
-#include <cassert>
 #include <cmath>
 #include <math.h>
 #include <vector>
 #include "blmintegrals.H"
-#include "femfunctions.H"
 
 using namespace std;
 
@@ -245,6 +243,7 @@ void blmintegrals :: integral1(vector<vector<double> >& a_matrix,
           a_matrix[qq][ww] = fS1[qq][ww];
         }
     }
+  //cout << "Inside integral stiff_elem[0][0] = " << a_matrix[0][1] << endl;
 };
 
 

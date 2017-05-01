@@ -1,11 +1,8 @@
 #include <iostream>
-#include <cassert>
 #include <cmath>
 #include <math.h>
 #include <vector>
 #include "blmintegrals.H"
-#include "femfunctions.H"
-#include <omp.h>
 
 using namespace std;
 
@@ -14,7 +11,7 @@ void blmintegrals :: integral1(double (&a_matrix)[24][24],
                                double (&a_x1)[8],
                                double (&a_x2)[8],
                                double (&a_x3)[8],
-		 vector<vector<double> >& Etensor)
+		 const vector<vector<double> > Etensor)
 
 {
   //Gauss Points for numerical integration
@@ -422,10 +419,10 @@ void blmintegrals :: integral2(double (&a_vector)[24],
 };
 		
 	      
-void blmintegrals :: integral3xx(vector<double>& a_vector,
-		 vector<double>& a_x1,
-		 vector<double>& a_x2,
-		 vector<double>& a_x3,
+void blmintegrals :: integral3xx(double (&a_vector)[24],
+                                 double (&a_x1)[8],
+                                 double (&a_x2)[8],
+                                 double (&a_x3)[8],
 		 vector<double>& a_zvector,
 		 vector<double>& a_traction)
 
@@ -597,10 +594,10 @@ void blmintegrals :: integral3xx(vector<double>& a_vector,
       }
 };
 
-void blmintegrals :: integral3yy(vector<double>& a_vector,
-		 vector<double>& a_x1,
-		 vector<double>& a_x2,
-		 vector<double>& a_x3,
+void blmintegrals :: integral3yy(double (&a_vector)[24],
+                                 double (&a_x1)[8],
+                                 double (&a_x2)[8],
+                                 double (&a_x3)[8],
 		 vector<double>& a_zvector,
 		 vector<double>& a_traction)
 
@@ -771,10 +768,10 @@ void blmintegrals :: integral3yy(vector<double>& a_vector,
       }
 };
 
-void blmintegrals :: integral3zz(vector<double>& a_vector,
-		 vector<double>& a_x1,
-		 vector<double>& a_x2,
-		 vector<double>& a_x3,
+void blmintegrals :: integral3zz(double (&a_vector)[24],
+                                 double (&a_x1)[8],
+                                 double (&a_x2)[8],
+                                 double (&a_x3)[8],
 		 vector<double>& a_zvector,
 		 vector<double>& a_traction)
 
