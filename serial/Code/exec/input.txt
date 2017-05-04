@@ -1,5 +1,5 @@
 Number of nodes in each direction:
-10
+8
 Force vector:
 100. 100. 100.
 Traction vector:
