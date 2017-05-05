@@ -14,13 +14,26 @@
 using namespace std;
 int main(int argc, char** argv)
 {
-    //Step 1: Generate the mesh
-    if(argc != 2)
+    char* fileName = NULL;
+    int numThreads;
+
+    for (int i=1; i < argc; i++)
     {
-        cout << "this program takes one argument that is the input file\n";
+        if (string(argv[i]) == "-i") {
+            fileName = argv[i + 1];
+        }
+        else if (string(argv[i]) == "-n") {
+            numThreads = atoi(argv[i+1]);
+            omp_set_num_threads(numThreads);
+        }
+    }
+
+    if (!fileName)
+    {
+        cout << "Provide an input file!" << endl;
         return 1;
     }
-    string inFile(argv[1]);
+    string inFile(fileName);
     string lines[8];
     string words[20];
     ifstream myfile(inFile.c_str());
@@ -42,10 +55,9 @@ int main(int argc, char** argv)
     double start;
     double startTotal = omp_get_wtime();
 
+    //Step 1: Generate the mesh
     int n_nodes = N*N*N; //Number of nodes
     int n_elem = (N-1)*(N-1)*(N-1); //number of elements
-    //FILE *fp = NULL;
-    //FILE *fp2 = NULL;
     vector<vector<double>> node_table; //Node table initialized
     vector<vector<int>> conn_table; //Connectivity table initialized
     Mesher mesh(N);
@@ -67,7 +79,6 @@ int main(int argc, char** argv)
         }
     }
     //Step 2 - Define the inputs and initialize the required arrays
-    vector<double> traction_elem(24); //traction vector per element
 
     //Define the conditions
     vector<double> force(3), traction(3); //body force and traction vector
@@ -114,7 +125,11 @@ int main(int argc, char** argv)
     SparseMatrix stiffness_matrix(3*n_nodes,3*n_nodes); //full stiffness matrix - Sparse matrix
     vector<double> load_vector(3*n_nodes); //full load vector
 
-    #pragma omp parallel for
+    double x1[8], x2[8], x3[8]; //space coordinates
+    double stiff_elem[24][24];
+    double load_elem[24];
+
+    #pragma omp parallel for private(x1, x2, x3, stiff_elem, load_elem)
     for(int e = 0; e < ((N-1)*(N-1)); e++)
     {
         double x1[8], x2[8], x3[8]; //space coordinates
@@ -162,14 +177,9 @@ int main(int argc, char** argv)
         }
     }
 
-
-    #pragma omp parallel for
+    #pragma omp parallel for private(x1, x2, x3, stiff_elem, load_elem)
     for(int e = ((N-1)*(N-1)); e < n_elem; e++)
     {
-        double x1[8], x2[8], x3[8]; //space coordinates
-        double stiff_elem[24][24];
-        double load_elem[24];
-
         for(int X = 0; X < 8; X++)
         {
             x1[X] = node_table[conn_table[e][X]][0];
@@ -215,9 +225,6 @@ int main(int argc, char** argv)
     start = omp_get_wtime();
 
     //Integral 3 - for boundary conditions
-    int p = stiffness_matrix.N();
-    const SparseMatrix constStiff = stiffness_matrix;
-
 //#pragma omp parallel for
     for(int e = 0; e < ((N-1)*(N-1)); e++)
     {
