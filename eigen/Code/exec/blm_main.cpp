@@ -129,10 +129,8 @@ int main(int argc, char** argv)
 
     blmintegrals blm_integrate;
     list<triplet> stiffness_tripletList;
-
     SpMat stiffness_matrix(3*n_nodes,3*n_nodes); //full stiffness matrix - Sparse matrix
-    //vector<double> load_vector(3*n_nodes); //full load vector
-    Eigen::VectorXd load_vector(3*n_nodes);
+    Eigen::VectorXd load_vector(3*n_nodes); //full load vector
 
     double x1[8], x2[8], x3[8]; //space coordinates
     double stiff_elem[24][24];
@@ -150,6 +148,7 @@ int main(int argc, char** argv)
 
         //Integral 1
         blm_integrate.integral1(stiff_elem, x1, x2, x3, Etensor);
+
         for (int ii = 4; ii < 8; ii++)
         {
             for (int jj = 4; jj < 8; jj++)
@@ -158,18 +157,21 @@ int main(int argc, char** argv)
                 if(stf > 0.00001 || stf < -0.00001)
                 {
                     //first component
+#pragma omp critical
                     stiffness_tripletList.push_back(triplet(conn_table[e][ii],conn_table[e][jj], stiff_elem[ii][jj]));
                 }
                 stf = stiff_elem[ii+8][jj+8];;
                 if(stf > 0.00001 || stf < -0.00001)
                 {
                     //second component
+#pragma omp critical
                     stiffness_tripletList.push_back(triplet(conn_table2[e][ii],conn_table2[e][jj], stiff_elem[ii+8][jj+8]));
                 }
                 stf = stiff_elem[ii+16][jj+16];;
                 if(stf > 0.00001 || stf < -0.00001)
                 {
                     //third component
+#pragma omp critical
                     stiffness_tripletList.push_back(triplet(conn_table3[e][ii],conn_table3[e][jj], stiff_elem[ii+16][jj+16]));
                 }
             }
@@ -205,18 +207,21 @@ int main(int argc, char** argv)
                 if(stf > 0.00001 || stf < -0.00001)
                 {
                     //first component
+#pragma omp critical
                     stiffness_tripletList.push_back(triplet(conn_table[e][ii],conn_table[e][jj], stiff_elem[ii][jj]));
                 }
                 stf = stiff_elem[ii+8][jj+8];;
                 if(stf > 0.00001 || stf < -0.00001)
                 {
                     //second component
+#pragma omp critical
                     stiffness_tripletList.push_back(triplet(conn_table2[e][ii],conn_table2[e][jj], stiff_elem[ii+8][jj+8]));
                 }
                 stf = stiff_elem[ii+16][jj+16];;
                 if(stf > 0.00001 || stf < -0.00001)
                 {
                     //third component
+#pragma omp critical
                     stiffness_tripletList.push_back(triplet(conn_table3[e][ii],conn_table3[e][jj], stiff_elem[ii+16][jj+16]));
                 }
             }
@@ -267,13 +272,13 @@ int main(int argc, char** argv)
         stiffness_tripletList.push_back(triplet(conn_table3[e][2],conn_table3[e][2], 1.0));
         stiffness_tripletList.push_back(triplet(conn_table3[e][3],conn_table3[e][3], 1.0));
 
-
         load_vector[conn_table3[e][0]] = 0.0;
         load_vector[conn_table3[e][1]] = 0.0;
         load_vector[conn_table3[e][2]] = 0.0;
         load_vector[conn_table3[e][3]] = 0.0;
     }
 
+    stiffness_matrix.setFromTriplets(stiffness_tripletList.begin(), stiffness_tripletList.end());
 
     cout << "Dirichlet BC, " << (omp_get_wtime() - start) << endl;
     start = omp_get_wtime();
@@ -307,8 +312,6 @@ int main(int argc, char** argv)
         }
     }
 
-    stiffness_matrix.setFromTriplets(stiffness_tripletList.begin(), stiffness_tripletList.end());
-
     cout << "Neumann BC, " << (omp_get_wtime() - start) << endl;
     cout << "Total Construction, " << (omp_get_wtime() - startTotal) << endl;
 
@@ -320,13 +323,21 @@ int main(int argc, char** argv)
     Eigen::VectorXd solution_vector(3*n_nodes);
     vector<vector<double>> ufull(n_nodes,vector<double>(3));
 
+//    for (auto it = stiffness_tripletList.begin(); it!=stiffness_tripletList.end(); ++it)
+//        cout << (*it).row() << " " << (*it).col() << " " << (*it).value() << endl;
+
+//    for (int i = 0; i < load_vector.size(); ++i)
+//        cout << load_vector[i] << endl;
+
     //return 0;
 
     //CGSolver solver;
     Eigen::ConjugateGradient<SpMat, Eigen::Lower|Eigen::Upper> solver;
     solver.compute(stiffness_matrix);
+    solver.setMaxIterations(59);
     solution_vector = solver.solve(load_vector);
-
+//    std::cout << "#iterations:     " << solver.iterations() << std::endl;
+//    std::cout << "estimated error: " << solver.error()      << std::endl;
 
     cout << "CG Solver, " << (omp_get_wtime() - start) << endl;
 

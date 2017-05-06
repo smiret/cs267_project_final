@@ -132,10 +132,6 @@ int main(int argc, char** argv)
     #pragma omp parallel for private(x1, x2, x3, stiff_elem, load_elem)
     for(int e = 0; e < ((N-1)*(N-1)); e++)
     {
-        double x1[8], x2[8], x3[8]; //space coordinates
-        double stiff_elem[24][24];
-        double load_elem[24];
-
         for(int X = 0; X < 8; X++)
         {
             x1[X] = node_table[conn_table[e][X]][0];
@@ -303,7 +299,10 @@ int main(int argc, char** argv)
     vector<double> solution_vector(3*n_nodes);
     vector<vector<double>> ufull(n_nodes,vector<double>(3));
 
-    //return 0;
+//    for (int i = 0; i < load_vector.size(); ++i)
+//        cout << load_vector[i] << endl;
+
+    return 0;
     //stiffness_matrix.print();
 
     CGSolver solver;
