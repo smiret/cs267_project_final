@@ -38,8 +38,6 @@ int main(int argc, char** argv)
   //int N = 10; //Number of nodes in each direction
   int n_nodes = N*N*N; //Number of nodes
   int n_elem = (N-1)*(N-1)*(N-1); //number of elements
-  //FILE *fp = NULL;
-  //FILE *fp2 = NULL;
 
   // Create clock
   clock_t start;

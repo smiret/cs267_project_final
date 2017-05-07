@@ -221,7 +221,7 @@ int main(int argc, char** argv)
     start = omp_get_wtime();
 
     //Integral 3 - for boundary conditions
-//#pragma omp parallel for
+    //#pragma omp parallel for
     for(int e = 0; e < ((N-1)*(N-1)); e++)
     {
         //First Component
@@ -269,7 +269,7 @@ int main(int argc, char** argv)
     vector<double> zvector(3); //direction for the surface boundary condition
     zvector = {0.0,0.0,1.0};
 
-//#pragma omp for
+    //#pragma omp for
     for (int e = (n_elem - (N-1)*(N-1)); e < n_elem; e++)
     {
         double x1[8], x2[8], x3[8]; //space coordinates
@@ -299,10 +299,6 @@ int main(int argc, char** argv)
     vector<double> solution_vector(3*n_nodes);
     vector<vector<double>> ufull(n_nodes,vector<double>(3));
 
-//    for (int i = 0; i < load_vector.size(); ++i)
-//        cout << load_vector[i] << endl;
-
-    return 0;
     //stiffness_matrix.print();
 
     CGSolver solver;
