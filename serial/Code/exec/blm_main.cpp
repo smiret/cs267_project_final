@@ -38,8 +38,6 @@ int main(int argc, char** argv)
   //int N = 10; //Number of nodes in each direction
   int n_nodes = N*N*N; //Number of nodes
   int n_elem = (N-1)*(N-1)*(N-1); //number of elements
-  //FILE *fp = NULL;
-  //FILE *fp2 = NULL;
 
   // Create clock
   clock_t start;
@@ -63,26 +61,7 @@ int main(int argc, char** argv)
           conn_table3[qq][ww] = conn_table2[qq][ww] + n_nodes;
         }
     }
-  /*fp = fopen("conn.txt", "w+");
-  for(int i=0; i<n_elem; i++)
-    {
-      for(int j=0; j<8;j++)
-        {
-          fprintf(fp,"%d ",conn_table2[i][j]);
-        }
-      fprintf(fp,"\n");
-    }
-  fprintf(fp,"\n\n");
-  for(int i=0; i<n_elem; i++)
-    {
-      for(int j=0; j<8;j++)
-        {
-          fprintf(fp,"%d ",conn_table3[i][j]);
-        }
-      fprintf(fp,"\n");
-    }
-  fclose(fp);
-  fp = NULL;   */
+    
   //Step 2 - Define the inputs and initialize the required arrays
   vector<double> traction_elem(24); //traction vector per element
 
@@ -133,53 +112,92 @@ int main(int argc, char** argv)
   vector<double> load_elem(24); //load vector per element
   vector<double> x1(8), x2(8), x3(8); //space coordinates
   //fp = fopen("loadelem.txt", "w+");
-  for(int e = 0; e < n_elem; e++)
+    for(int e = 0; e < ((N-1)*(N-1)); e++)
     {
-      for(int X = 0; X < 8; X++)
+        for(int X = 0; X < 8; X++)
         {
-          x1[X] = node_table[conn_table[e][X]][0];
-          x2[X] = node_table[conn_table[e][X]][1];
-          x3[X] = node_table[conn_table[e][X]][2];
+            x1[X] = node_table[conn_table[e][X]][0];
+            x2[X] = node_table[conn_table[e][X]][1];
+            x3[X] = node_table[conn_table[e][X]][2];
         }
 
-      //Integral 1
-      blm_integrate.integral1(stiff_elem, x1, x2, x3, Etensor);
-      for (int ii = 0; ii < 8; ii++)
+        //Integral 1
+        blm_integrate.integral1(stiff_elem, x1, x2, x3, Etensor);
+        for (int ii = 4; ii < 8; ii++)
         {
-          for (int jj = 0; jj < 8; jj++)
+            for (int jj = 4; jj < 8; jj++)
             {
-              double stf = stiff_elem[ii][jj];;
-              if(stf > 0.00001 || stf < -0.00001)
+                double stf = stiff_elem[ii][jj];;
+                if(stf > 0.00001 || stf < -0.00001)
                 {
-                  stiffness_matrix[{{conn_table[e][ii],conn_table[e][jj]}}] += stiff_elem[ii][jj]; //first component
+                    stiffness_matrix[{{conn_table[e][ii],conn_table[e][jj]}}] += stiff_elem[ii][jj]; //first component
                 }
                 stf = stiff_elem[ii+8][jj+8];;
-              if(stf > 0.00001 || stf < -0.00001)
+                if(stf > 0.00001 || stf < -0.00001)
                 {
-                  stiffness_matrix[{{conn_table2[e][ii],conn_table2[e][jj]}}] += stiff_elem[ii+8][jj+8]; //second component
+                    stiffness_matrix[{{conn_table2[e][ii],conn_table2[e][jj]}}] += stiff_elem[ii+8][jj+8]; //second component
                 }
-              stf = stiff_elem[ii+16][jj+16];;
-              if(stf > 0.00001 || stf < -0.00001)
+                stf = stiff_elem[ii+16][jj+16];;
+                if(stf > 0.00001 || stf < -0.00001)
                 {
-                  stiffness_matrix[{{conn_table3[e][ii],conn_table3[e][jj]}}] += stiff_elem[ii+16][jj+16]; //second component
+                    stiffness_matrix[{{conn_table3[e][ii],conn_table3[e][jj]}}] += stiff_elem[ii+16][jj+16]; //second component
                 }
             }
         }
 
-      //Integral 2
-      blm_integrate.integral2(load_elem, x1, x2, x3, force);
-      /*for(int i=0; i<(3*8); i++)
+        //Integral 2
+        blm_integrate.integral2(load_elem, x1, x2, x3, force);
+        for (int ii = 4; ii < 8; ii++)
         {
-          fprintf(fp,"%14.10f",load_elem[i]);
-          fprintf(fp,"\n");
-        }*/
-      for (int ii = 0; ii < 8; ii++)
-        {
-          load_vector[conn_table[e][ii]] += load_elem[ii]; //first component
-          load_vector[conn_table2[e][ii]] += load_elem[ii+8]; //second component
-          load_vector[conn_table3[e][ii]] += load_elem[ii+16]; //third component
+            load_vector[conn_table[e][ii]] += load_elem[ii]; //first component
+            load_vector[conn_table2[e][ii]] += load_elem[ii+8]; //second component
+            load_vector[conn_table3[e][ii]] += load_elem[ii+16]; //third component
         }
-      //cout << " stiff_elem[0][0] = " << stiff_elem[0][1] << endl;
+    }
+
+
+
+    for(int e = ((N-1)*(N-1)); e < n_elem; e++)
+    {
+        for(int X = 0; X < 8; X++)
+        {
+            x1[X] = node_table[conn_table[e][X]][0];
+            x2[X] = node_table[conn_table[e][X]][1];
+            x3[X] = node_table[conn_table[e][X]][2];
+        }
+
+        //Integral 1
+        blm_integrate.integral1(stiff_elem, x1, x2, x3, Etensor);
+        for (int ii = 0; ii < 8; ii++)
+        {
+            for (int jj = 0; jj < 8; jj++)
+            {
+                double stf = stiff_elem[ii][jj];;
+                if(stf > 0.00001 || stf < -0.00001)
+                {
+                    stiffness_matrix[{{conn_table[e][ii],conn_table[e][jj]}}] += stiff_elem[ii][jj]; //first component
+                }
+                stf = stiff_elem[ii+8][jj+8];;
+                if(stf > 0.00001 || stf < -0.00001)
+                {
+                    stiffness_matrix[{{conn_table2[e][ii],conn_table2[e][jj]}}] += stiff_elem[ii+8][jj+8]; //second component
+                }
+                stf = stiff_elem[ii+16][jj+16];;
+                if(stf > 0.00001 || stf < -0.00001)
+                {
+                    stiffness_matrix[{{conn_table3[e][ii],conn_table3[e][jj]}}] += stiff_elem[ii+16][jj+16]; //second component
+                }
+            }
+        }
+
+        //Integral 2
+        blm_integrate.integral2(load_elem, x1, x2, x3, force);
+        for (int ii = 0; ii < 8; ii++)
+        {
+            load_vector[conn_table[e][ii]] += load_elem[ii]; //first component
+            load_vector[conn_table2[e][ii]] += load_elem[ii+8]; //second component
+            load_vector[conn_table3[e][ii]] += load_elem[ii+16]; //third component
+        }
     }
 
   cout << "Matrix construction, " << (clock() - start)/ (double)CLOCKS_PER_SEC << endl;
@@ -190,122 +208,43 @@ int main(int argc, char** argv)
   start = clock();
   int p = stiffness_matrix.N();
   const SparseMatrix constStiff = stiffness_matrix;
-  for(int e = 0; e < ((N-1)*(N-1)); e++)
+    for(int e = 0; e < ((N-1)*(N-1)); e++)
     {
-      //First Component
-      for(int aa = 0; aa < p; aa++)
-        {
-          const double stf = constStiff[{{conn_table[e][0],aa}}];
-          if(stf != 0.)
-            {
-              stiffness_matrix[{{conn_table[e][0],aa}}] = 0.0;
-            }
-        }
-      for(int aa = 0; aa < p; aa++)
-        {
-          const double stf = constStiff[{{conn_table[e][1],aa}}];
-          if(stf != 0.)
-            {
-              stiffness_matrix[{{conn_table[e][1],aa}}] = 0.0;
-            }
-        }
-      for(int aa = 0; aa < p; aa++)
-        {
-          const double stf = constStiff[{{conn_table[e][2],aa}}];
-          if(stf != 0.)
-            {
-              stiffness_matrix[{{conn_table[e][2],aa}}] = 0.0;
-            }
-        }
-      for(int aa = 0; aa < p; aa++)
-        {
-          const double stf = constStiff[{{conn_table[e][3],aa}}];
-          if(stf != 0.)
-            {
-              stiffness_matrix[{{conn_table[e][3],aa}}] = 0.0;
-            }
-        }
-      stiffness_matrix[{{conn_table[e][0],conn_table[e][0]}}] = 1.0;
-      stiffness_matrix[{{conn_table[e][1],conn_table[e][1]}}] = 1.0;
-      stiffness_matrix[{{conn_table[e][2],conn_table[e][2]}}] = 1.0;
-      stiffness_matrix[{{conn_table[e][3],conn_table[e][3]}}] = 1.0;
+        //First Component
+        stiffness_matrix[{{conn_table[e][0],conn_table[e][0]}}] = 1.0;
+        stiffness_matrix[{{conn_table[e][1],conn_table[e][1]}}] = 1.0;
+        stiffness_matrix[{{conn_table[e][2],conn_table[e][2]}}] = 1.0;
+        stiffness_matrix[{{conn_table[e][3],conn_table[e][3]}}] = 1.0;
 
-       //Second Component
-      for(int aa = 0; aa < p; aa++)
-        {
-          const double stf = constStiff[{{conn_table2[e][0],aa}}];
-          if(stf != 0.)
-            {
-              stiffness_matrix[{{conn_table2[e][0],aa}}] = 0.0;
-            }
-        }
-      for(int aa = 0; aa < p; aa++)
-        {
-          const double stf = constStiff[{{conn_table2[e][1],aa}}];
-          if(stf != 0.)
-            {
-              stiffness_matrix[{{conn_table2[e][1],aa}}] = 0.0;
-            }
-        }
-      for(int aa = 0; aa < p; aa++)
-        {
-          const double stf = constStiff[{{conn_table2[e][2],aa}}];
-          if(stf != 0.)
-            {
-              stiffness_matrix[{{conn_table2[e][2],aa}}] = 0.0;
-            }
-        }
-      for(int aa = 0; aa < p; aa++)
-        {
-          const double stf = constStiff[{{conn_table2[e][3],aa}}];
-          if(stf != 0.)
-            {
-              stiffness_matrix[{{conn_table2[e][3],aa}}] = 0.0;
-            }
-        }
-      stiffness_matrix[{{conn_table2[e][0],conn_table2[e][0]}}] = 1.0;
-      stiffness_matrix[{{conn_table2[e][1],conn_table2[e][1]}}] = 1.0;
-      stiffness_matrix[{{conn_table2[e][2],conn_table2[e][2]}}] = 1.0;
-      stiffness_matrix[{{conn_table2[e][3],conn_table2[e][3]}}] = 1.0;
+        load_vector[conn_table[e][0]] = 0.0;
+        load_vector[conn_table[e][1]] = 0.0;
+        load_vector[conn_table[e][2]] = 0.0;
+        load_vector[conn_table[e][3]] = 0.0;
 
-       //Third Component
-     for(int aa = 0; aa < p; aa++)
-        {
-          const double stf = constStiff[{{conn_table3[e][0],aa}}];
-          if(stf != 0.)
-            {
-              stiffness_matrix[{{conn_table3[e][0],aa}}] = 0.0;
-            }
-        }
-      for(int aa = 0; aa < p; aa++)
-        {
-          const double stf = constStiff[{{conn_table3[e][1],aa}}];
-          if(stf != 0.)
-            {
-              stiffness_matrix[{{conn_table3[e][1],aa}}] = 0.0;
-            }
-        }
-      for(int aa = 0; aa < p; aa++)
-        {
-          const double stf = constStiff[{{conn_table3[e][2],aa}}];
-          if(stf != 0.)
-            {
-              stiffness_matrix[{{conn_table3[e][2],aa}}] = 0.0;
-            }
-        }
-      for(int aa = 0; aa < p; aa++)
-        {
-          const double stf = constStiff[{{conn_table3[e][3],aa}}];
-          if(stf != 0.)
-            {
-              stiffness_matrix[{{conn_table3[e][3],aa}}] = 0.0;
-            }
-        }
-      stiffness_matrix[{{conn_table3[e][0],conn_table3[e][0]}}] = 1.0;
-      stiffness_matrix[{{conn_table3[e][1],conn_table3[e][1]}}] = 1.0;
-      stiffness_matrix[{{conn_table3[e][2],conn_table3[e][2]}}] = 1.0;
-      stiffness_matrix[{{conn_table3[e][3],conn_table3[e][3]}}] = 1.0;
+        //Second Component
+        stiffness_matrix[{{conn_table2[e][0],conn_table2[e][0]}}] = 1.0;
+        stiffness_matrix[{{conn_table2[e][1],conn_table2[e][1]}}] = 1.0;
+        stiffness_matrix[{{conn_table2[e][2],conn_table2[e][2]}}] = 1.0;
+        stiffness_matrix[{{conn_table2[e][3],conn_table2[e][3]}}] = 1.0;
+
+        load_vector[conn_table2[e][0]] = 0.0;
+        load_vector[conn_table2[e][1]] = 0.0;
+        load_vector[conn_table2[e][2]] = 0.0;
+        load_vector[conn_table2[e][3]] = 0.0;
+
+        //Third Component
+        stiffness_matrix[{{conn_table3[e][0],conn_table3[e][0]}}] = 1.0;
+        stiffness_matrix[{{conn_table3[e][1],conn_table3[e][1]}}] = 1.0;
+        stiffness_matrix[{{conn_table3[e][2],conn_table3[e][2]}}] = 1.0;
+        stiffness_matrix[{{conn_table3[e][3],conn_table3[e][3]}}] = 1.0;
+
+        load_vector[conn_table3[e][0]] = 0.0;
+        load_vector[conn_table3[e][1]] = 0.0;
+        load_vector[conn_table3[e][2]] = 0.0;
+        load_vector[conn_table3[e][3]] = 0.0;
     }
+
+
   cout << "Dirichlet BC, " << (clock() - start)/ (double)CLOCKS_PER_SEC << endl;
   start = clock();
   //Traction boundary condition
@@ -317,8 +256,7 @@ int main(int argc, char** argv)
   vector<double> zvector(3); //direction for the surface boundary condition
   zvector = {0.0,0.0,1.0};
   vector<double> surface_elem(24); //load vector per element for surface boundary condition
-  /*fp = fopen("surfaceelem.txt", "w+");
-  fp2 = fopen("x.txt", "w+");*/
+
   for (int e = (n_elem - (N-1)*(N-1)); e < n_elem; e++)
     {
       for (int X = 0; X < 8; X++)
@@ -327,27 +265,7 @@ int main(int argc, char** argv)
           x2[X] = node_table[conn_table[e][X]][1];
           x3[X] = node_table[conn_table[e][X]][2];
         }
-      /*for(int i=0; i<(8); i++)
-        {
-          fprintf(fp2,"%14.10f  ",x1[i]);
-        }
-      fprintf(fp2,"\n");
-      for(int i=0; i<(8); i++)
-        {
-          fprintf(fp2,"%14.10f  ",x2[i]);
-        }
-      fprintf(fp2,"\n");
-      for(int i=0; i<(8); i++)
-        {
-          fprintf(fp2,"%14.10f  ",x3[i]);
-        }
-      fprintf(fp2,"\n");*/
       blm_integrate.integral3zz(surface_elem, x1, x2, x3, zvector, traction);
-      /*for(int i=0; i<(3*8); i++)
-        {
-          fprintf(fp,"%14.10f",surface_elem[i]);
-          fprintf(fp,"\n");
-        }*/
       for (int ii = 0; ii < 8; ii++)
         {
           load_vector[conn_table[e][ii]] += surface_elem[ii]; //first component
@@ -355,10 +273,6 @@ int main(int argc, char** argv)
           load_vector[conn_table3[e][ii]] += surface_elem[ii+16]; //third component
         }
     }
-  /*fclose(fp);
-  fp = NULL;
-  fclose(fp2);
-  fp2 = NULL;*/
 
   cout << "Neumann BC, " << (clock() - start)/ (double)CLOCKS_PER_SEC << endl;
   cout << "Total Construction, " << (clock() - startTotal)/ (double)CLOCKS_PER_SEC << endl;
@@ -368,28 +282,8 @@ int main(int argc, char** argv)
   vector<double> solution_vector(3*n_nodes);
   vector<vector<double>> ufull(n_nodes,vector<double>(3));
 
-  /*fp = fopen("load.txt", "w+");
-  for(int i=0; i<(3*n_nodes); i++)
-    {
-      fprintf(fp,"%14.10f",load_vector[i]);
-      fprintf(fp,"\n");
-    }
-  fclose(fp);
-  fp = NULL;
-  fp = fopen("stiffness.txt", "w+");
-  for(int i=0; i<(3*n_nodes); i++)
-    {
-      for(int j=0; j<(3*n_nodes);j++)
-        {
-          //fprintf(fp,"%14.10f ",stiffness_matrix[{{i,j}}]);
-        }
-      fprintf(fp,"\n");
-    }
-  fclose(fp);
-  fp = NULL;*/
-
   CGSolver solver;
-  //JacobiSolver solver;
+
   int iterations = 10000;
   float residual = solver.solve(stiffness_matrix,load_vector,1E-6,iterations,solution_vector);
   cout << "CG Solver, " << (clock() - start)/ (double)CLOCKS_PER_SEC << endl;
